@@ -394,6 +394,17 @@ impl EvaluationResult {
         }
     }
 
+    pub fn must_apply(self) -> bool {
+        match self {
+            EvaluatedToOk => true,
+
+            EvaluatedToAmbig |
+            EvaluatedToUnknown |
+            EvaluatedToErr |
+            EvaluatedToRecur => false
+        }
+    }
+
     fn is_stack_dependent(self) -> bool {
         match self {
             EvaluatedToUnknown |

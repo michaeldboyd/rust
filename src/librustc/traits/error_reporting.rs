@@ -871,7 +871,7 @@ impl<'a, 'gcx, 'tcx> InferCtxt<'a, 'gcx, 'tcx> {
                                                          obligation.param_env,
                                                          new_trait_ref.to_predicate());
 
-                    if selcx.evaluate_obligation(&new_obligation) {
+                    if selcx.evaluate_obligation(&new_obligation).must_apply() {
                         let sp = self.tcx.sess.codemap()
                             .span_take_while(span, |c| c.is_whitespace() || *c == '&');
 
