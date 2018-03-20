@@ -644,12 +644,8 @@ impl<'a, 'gcx, 'tcx> InferCtxt<'a, 'gcx, 'tcx> {
                                 }
                                 trait_pred
                             });
-                            let unit_obligation = Obligation {
-                                predicate: ty::Predicate::Trait(predicate),
-                                .. obligation.clone()
-                            };
-                            let mut selcx = SelectionContext::new(self);
-                            if selcx.evaluate_obligation(&unit_obligation) {
+                            if self.predicate_may_hold(obligation.param_env,
+                                                       ty::Predicate::Trait(predicate)) {
                                 err.note("the trait is implemented for `()`. \
                                          Possibly this error has been caused by changes to \
                                          Rust's type-inference algorithm \
@@ -875,7 +871,7 @@ impl<'a, 'gcx, 'tcx> InferCtxt<'a, 'gcx, 'tcx> {
                                                          obligation.param_env,
                                                          new_trait_ref.to_predicate());
 
-                    if selcx.evaluate_obligation(&new_obligation) {
+                    if selcx.evaluate_obligation(&new_obligation).must_apply() {
                         let sp = self.tcx.sess.codemap()
                             .span_take_while(span, |c| c.is_whitespace() || *c == '&');
 
@@ -1312,13 +1308,7 @@ impl<'a, 'gcx, 'tcx> InferCtxt<'a, 'gcx, 'tcx> {
                 &cleaned_pred
             ).value;
 
-            let obligation = Obligation::new(
-                ObligationCause::dummy(),
-                param_env,
-                cleaned_pred.to_predicate()
-            );
-
-            selcx.evaluate_obligation(&obligation)
+            self.predicate_may_hold(param_env, cleaned_pred.to_predicate())
         })
     }
 
